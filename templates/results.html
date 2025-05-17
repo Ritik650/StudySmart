@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Prediction Results | Student Performance</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold text-center text-indigo-700 mb-8">Student Performance Results</h1>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Prediction Results Card -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Results for {{ name }}</h2>
+                
+                <!-- Prediction Display -->
+                <div class="flex justify-center mb-6">
+                    {% set numeric_grade = prediction|float(default=0) if prediction|string|float(default=0) > 0 else 0 %}
+                    <div class="w-40 h-40 rounded-full flex items-center justify-center border-8 
+                        {% if numeric_grade >= 4 or prediction == 'AA' or prediction == 'BA' %}
+                            border-green-500
+                        {% elif numeric_grade >= 3 or prediction == 'BB' or prediction == 'CB' %}
+                            border-blue-500
+                        {% elif numeric_grade >= 2 or prediction == 'CC' or prediction == 'DC' %}
+                            border-yellow-500
+                        {% else %}
+                            border-red-500
+                        {% endif %}
+                        ">
+                        <div class="text-center">
+                            <div class="text-4xl font-bold">{{ prediction }}</div>
+                            <div class="text-sm text-gray-500">Predicted Grade</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Confidence Score if available -->
+                {% if confidence %}
+                <div class="mt-4">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-2">Prediction Confidence</h3>
+                    <div class="w-full bg-gray-200 rounded-full h-4">
+                        <div class="bg-blue-600 h-4 rounded-full" style="width: {{ confidence }}%"></div>
+                    </div>
+                    <p class="text-sm text-gray-600 mt-1">{{ "%.1f"|format(confidence) }}% confidence</p>
+                </div>
+                {% endif %}
+                
+                <!-- Performance Category -->
+                <div class="mt-6">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-2">Performance Category</h3>
+                    <p class="text-lg font-medium
+                        {% if numeric_grade >= 4 or prediction == 'AA' or prediction == 'BA' %}
+                            text-green-600
+                        {% elif numeric_grade >= 3 or prediction == 'BB' or prediction == 'CB' %}
+                            text-blue-600
+                        {% elif numeric_grade >= 2 or prediction == 'CC' or prediction == 'DC' %}
+                            text-yellow-600
+                        {% else %}
+                            text-red-600
+                        {% endif %}
+                        ">
+                        {{ study_plan.category }}
+                    </p>
+                </div>
+                
+                <!-- Feature Importance Visualization -->
+                {% if importance_img %}
+                <div class="mt-8">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-4">Factors Influencing Your Performance</h3>
+                    <img src="data:image/png;base64,{{ importance_img }}" alt="Feature Importance" class="w-full">
+                </div>
+                {% else %}
+                <div class="mt-8">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-4">Factors Influencing Your Performance</h3>
+                    <img src="/static/feature_importance.png" alt="Feature Importance" class="w-full">
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Study Plan Card -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Personalized Study Plan</h2>
+                
+                <!-- Study Plan Details -->
+                <div class="space-y-4">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-700">Recommended Weekly Study Hours</h3>
+                        <p class="text-3xl font-bold text-indigo-600">{{ study_plan.recommended_hours }} hours</p>
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-700">Focus Areas</h3>
+                        <ul class="list-disc ml-5 text-gray-700">
+                            {% for area in study_plan.focus_areas %}
+                                <li>{{ area }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-700">Weekly Schedule</h3>
+                        <div class="mt-2 border border-gray-200 rounded-md overflow-hidden">
+                            {% for day, activity in study_plan.weekly_plan.items() %}
+                                <div class="flex py-2 px-3 {% if not loop.last %}border-b border-gray-200{% endif %} {% if day == 'Weekend' %}bg-gray-50{% endif %}">
+                                    <div class="font-medium w-24">{{ day }}</div>
+                                    <div class="text-gray-700">{{ activity }}</div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Personalized Tips -->
+                <div class="mt-8 p-5 bg-indigo-50 rounded-md">
+                    <h3 class="text-lg font-semibold text-indigo-700 mb-2">Tips for Improvement</h3>
+                    
+                    {% set numeric_grade = prediction|float(default=0) if prediction|string|float(default=0) > 0 else 0 %}
+                    {% if numeric_grade >= 4 or prediction == 'AA' or prediction == 'BA' %}
+                        <ul class="list-disc ml-5 text-indigo-800">
+                            <li>Challenge yourself with advanced problem sets</li>
+                            <li>Consider peer tutoring to reinforce your knowledge</li>
+                            <li>Explore competitive exams and Olympiads</li>
+                            <li>Develop research projects in areas of interest</li>
+                            <li>Balance your high academic load with relaxation techniques</li>
+                        </ul>
+                    {% elif numeric_grade >= 3 or prediction == 'BB' or prediction == 'CB' %}
+                        <ul class="list-disc ml-5 text-indigo-800">
+                            <li>Focus on strengthening your conceptual understanding</li>
+                            <li>Practice more complex problems in your stronger areas</li>
+                            <li>Form or join study groups for collaborative learning</li>
+                            <li>Create concise summary notes for quick revision</li>
+                            <li>Maintain consistency in your study schedule</li>
+                        </ul>
+                    {% elif numeric_grade >= 2 or prediction == 'CC' or prediction == 'DC' %}
+                        <ul class="list-disc ml-5 text-indigo-800">
+                            <li>Increase regular practice with varied problem sets</li>
+                            <li>Focus on understanding core concepts thoroughly</li>
+                            <li>Use visual aids and diagrams to improve comprehension</li>
+                            <li>Schedule regular review sessions of previous material</li>
+                            <li>Seek help for topics you find challenging</li>
+                        </ul>
+                    {% else %}
+                        <ul class="list-disc ml-5 text-indigo-800">
+                            <li>Build a strong foundation in fundamental concepts</li>
+                            <li>Break down study sessions into shorter, more frequent periods</li>
+                            <li>Use multiple learning resources (videos, books, tutorials)</li>
+                            <li>Practice active recall techniques instead of passive reading</li>
+                            <li>Track your progress on specific topics to build confidence</li>
+                        </ul>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-8 flex justify-center space-x-4">
+            <a href="/" class="px-6 py-3 bg-indigo-600 text-white font-medium rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                Make Another Prediction
+            </a>
+            
+            <button onclick="window.print()" class="px-6 py-3 bg-gray-600 text-white font-medium rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+                Print Results
+            </button>
+        </div>
+    </div>
+</body>
+</html>
