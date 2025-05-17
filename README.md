@@ -1,4 +1,4 @@
-```markdown
+
 # StudySmart
 
 [StudySmart Web App](https://studysmart-webapp.streamlit.app/)
@@ -47,5 +47,5 @@ Access the web app directly from here: [https://studysmart-webapp.streamlit.app/
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-```
+
 
